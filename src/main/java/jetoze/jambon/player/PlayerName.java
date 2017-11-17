@@ -1,6 +1,6 @@
 package jetoze.jambon.player;
 
-import static jetoze.jambon.util.MorePreconditions.checkNotEmpty;
+import static jetoze.preconds.MorePreconditions.checkNotEmpty;
 
 import java.util.Objects;
 

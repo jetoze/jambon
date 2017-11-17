@@ -13,6 +13,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableList;
 
+import jetoze.collections.ImCollectors;
+
 /**
  * Represents a folder on disk.
  */

@@ -1,6 +1,6 @@
 package jetoze.jambon.team;
 
-import static jetoze.jambon.util.MorePreconditions.checkNotEmpty;
+import static jetoze.preconds.MorePreconditions.checkNotEmpty;
 
 public final class Team {
 	private final String id;

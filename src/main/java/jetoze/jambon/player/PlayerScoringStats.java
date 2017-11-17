@@ -1,6 +1,6 @@
 package jetoze.jambon.player;
 
-import static jetoze.jambon.util.MorePreconditions.checkNotNegative;
+import static jetoze.preconds.MorePreconditions.checkNotNegative;
 
 import java.util.Objects;
 

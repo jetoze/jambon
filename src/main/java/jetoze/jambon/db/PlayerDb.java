@@ -1,7 +1,7 @@
 package jetoze.jambon.db;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static jetoze.jambon.util.MorePreconditions.checkNotEmpty;
+import static jetoze.preconds.MorePreconditions.checkNotEmpty;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -9,12 +9,12 @@ import java.io.IOException;
 
 import com.google.common.collect.ImmutableSet;
 
+import jetoze.collections.ImCollectors;
 import jetoze.exhume.XmlBuilder;
 import jetoze.jambon.player.Player;
 import jetoze.jambon.player.PlayerName;
 import jetoze.jambon.player.Strengths;
 import jetoze.jambon.util.Folder;
-import jetoze.jambon.util.ImCollectors;
 
 public abstract class PlayerDb {
 	
