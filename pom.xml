@@ -32,7 +32,7 @@
     	<scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>jetoze</groupId>
+    	<groupId>tzeth</groupId>
     	<artifactId>exhume</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
     </dependency>

@@ -1,7 +1,7 @@
 package jetoze.jambon.player;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static jetoze.preconds.MorePreconditions.checkNotEmpty;
+import static tzeth.preconds.MorePreconditions.checkNotEmpty;
 
 import java.time.LocalDate;
 

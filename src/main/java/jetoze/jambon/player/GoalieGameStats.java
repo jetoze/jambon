@@ -1,7 +1,7 @@
 package jetoze.jambon.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static jetoze.preconds.MorePreconditions.checkNotNegative;
+import static tzeth.preconds.MorePreconditions.checkNotNegative;
 
 public final class GoalieGameStats {
 	// TODO: Add seconds played
