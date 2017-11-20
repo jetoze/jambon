@@ -6,26 +6,26 @@ import static tzeth.preconds.MorePreconditions.checkNotEmpty;
 import java.time.LocalDate;
 
 public final class GameData { // TODO: Come up with a better name
-	private final String homeTeamId;
-	private final String visitingTeamId;
-	private final LocalDate date;
+    private final String homeTeamId;
+    private final String visitingTeamId;
+    private final LocalDate date;
 
-	public GameData(String homeTeamId, String visitingTeamId, LocalDate date) {
-		this.homeTeamId = checkNotEmpty(homeTeamId);
-		this.visitingTeamId = checkNotEmpty(visitingTeamId);
-		this.date = checkNotNull(date);
-	}
+    public GameData(String homeTeamId, String visitingTeamId, LocalDate date) {
+        this.homeTeamId = checkNotEmpty(homeTeamId);
+        this.visitingTeamId = checkNotEmpty(visitingTeamId);
+        this.date = checkNotNull(date);
+    }
 
-	public String getHomeTeamId() {
-		return homeTeamId;
-	}
+    public String getHomeTeamId() {
+        return homeTeamId;
+    }
 
-	public String getVisitingTeamId() {
-		return visitingTeamId;
-	}
+    public String getVisitingTeamId() {
+        return visitingTeamId;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public LocalDate getDate() {
+        return date;
+    }
 
 }
