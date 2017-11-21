@@ -48,10 +48,10 @@ public abstract class PlayerDb {
             XmlBuilder xmlBuilder = new XmlBuilder();
             PlayerName name = player.getName();
             Strengths strengths = player.getStrengths();
-            xmlBuilder.root("player").attribute("id", player.getId())
-                .attribute("dob", player.getBirthDate().toString())
-                .child("name").attribute("first", player.getName().getFirstName())
-                    .attribute("last", name.getLastName()).close()
+            xmlBuilder.root("player").withAttribute("id", player.getId())
+                .withAttribute("dob", player.getBirthDate().toString())
+                .child("name").withAttribute("first", player.getName().getFirstName())
+                    .withAttribute("last", name.getLastName()).close()
                 .child("strengths")
                     .child("goalie").withValue(Double.toString(strengths.getGoalieStrength().getSavePercentage())).close()
                     .child("defender").withValue(Double.toString(strengths.getDefenderStrength().getFactor())).close()
