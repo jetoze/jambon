@@ -1,8 +1,10 @@
 package jetoze.jambon.player;
 
-import static com.google.common.base.Preconditions.*;
-import static tzeth.preconds.MorePreconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static tzeth.preconds.MorePreconditions.checkNotEmpty;
+
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -18,11 +20,11 @@ public final class PlayerMasterDetails {
     private final ImmutableList<Season> activeSeasons;
     
     public PlayerMasterDetails(String id, PlayerName name, LocalDate birthDate,
-            ImmutableList<Season> activeSeasons) {
+            List<Season> activeSeasons) {
         this.id = checkNotEmpty(id);
         this.name = checkNotNull(name);
         this.birthDate = checkNotNull(birthDate);
-        this.activeSeasons = checkNotNull(activeSeasons);
+        this.activeSeasons = ImmutableList.copyOf(activeSeasons);
     }
 
     public String getId() {

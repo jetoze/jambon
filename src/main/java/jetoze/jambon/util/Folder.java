@@ -46,6 +46,10 @@ public final class Folder {
     public File getFile(String name) {
         return Paths.get(this.path.toString(), name).toFile();
     }
+    
+    public Folder subFolder(String name) {
+        return new Folder(Paths.get(this.path.toString(), name));
+    }
 
     public ImmutableList<File> listAllFiles() {
         return listFiles(f -> true);
