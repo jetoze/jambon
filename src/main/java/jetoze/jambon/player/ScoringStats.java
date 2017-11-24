@@ -1,5 +1,6 @@
 package jetoze.jambon.player;
 
+import static com.google.common.base.Preconditions.*;
 import static tzeth.preconds.MorePreconditions.checkNotNegative;
 
 import java.util.Objects;
@@ -15,6 +16,7 @@ public final class ScoringStats {
         this(0, 0, 0);
     }
 
+    // TODO: Too many int-arguments make this constructor very user-unfriendly and error prone.
     public ScoringStats(int gamesPlayed, int goalsScored, int assists) {
         this.gamesPlayed = checkNotNegative(gamesPlayed);
         this.goalsScored = checkNotNegative(goalsScored);
@@ -37,10 +39,10 @@ public final class ScoringStats {
         return goalsScored + assists;
     }
 
-    public ScoringStats addGameStats(GameScoringStats gameStats) {
-        return new ScoringStats(this.gamesPlayed + 1,
-                this.goalsScored + gameStats.getGoalsScored(),
-                this.assists + gameStats.getAssists());
+    public ScoringStats add(ScoringStats o) {
+        return new ScoringStats(this.gamesPlayed + o.gamesPlayed,
+                this.goalsScored + o.goalsScored,
+                this.assists + o.assists);
     }
 
     @Override

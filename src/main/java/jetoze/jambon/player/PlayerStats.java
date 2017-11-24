@@ -10,6 +10,10 @@ public final class PlayerStats {
     private final ScoringStats scoring;
     private final GoalieStats goalie;
 
+    public PlayerStats() {
+        this(new ScoringStats(), new GoalieStats());
+    }
+    
     public PlayerStats(ScoringStats scoring, GoalieStats goalie) {
         this.scoring = checkNotNull(scoring);
         this.goalie = checkNotNull(goalie);
@@ -21,6 +25,10 @@ public final class PlayerStats {
 
     public GoalieStats getGoalieStats() {
         return goalie;
+    }
+    
+    public PlayerStats add(PlayerStats o) {
+        return new PlayerStats(this.scoring.add(o.scoring), this.goalie.add(o.goalie));
     }
 
     @Override

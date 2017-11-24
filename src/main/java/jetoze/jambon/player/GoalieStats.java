@@ -18,6 +18,7 @@ public final class GoalieStats {
         this(0, 0, 0, 0);
     }
 
+    // TODO: Too many int-arguments make this constructor very user-unfriendly and error prone.
     public GoalieStats(int gamesPlayed, int secondsPlayed, int shotsAgainst, int goalsAgainst) {
         this.gamesPlayed = checkNotNegative(gamesPlayed);
         this.secondsPlayed = checkNotNegative(secondsPlayed);
@@ -46,12 +47,11 @@ public final class GoalieStats {
         return secondsPlayed;
     }
 
-    public GoalieStats addGameStats(GoalieStats gameStats) {
-        checkArgument(gameStats.getGamesPlayed() == 1);
-        return new GoalieStats(this.gamesPlayed + 1,
-                this.secondsPlayed + gameStats.getSecondsPlayed(),
-                this.shotsAgainst + gameStats.getShotsAgainst(),
-                this.goalsAgainst + gameStats.getGoalsAgainst());
+    public GoalieStats add(GoalieStats o) {
+        return new GoalieStats(this.gamesPlayed + o.gamesPlayed,
+                this.secondsPlayed + o.secondsPlayed,
+                this.shotsAgainst + o.shotsAgainst,
+                this.goalsAgainst + o.goalsAgainst);
     }
 
     @Override
@@ -62,16 +62,16 @@ public final class GoalieStats {
         if (obj instanceof GoalieStats) {
             GoalieStats that = (GoalieStats) obj;
             return (this.gamesPlayed == that.gamesPlayed)
+                    && (this.secondsPlayed == that.secondsPlayed)
                     && (this.shotsAgainst == that.shotsAgainst)
-                    && (this.goalsAgainst == that.goalsAgainst)
-                    && (this.secondsPlayed == that.secondsPlayed);
+                    && (this.goalsAgainst == that.goalsAgainst);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.gamesPlayed, this.shotsAgainst, this.goalsAgainst, this.secondsPlayed);
+        return Objects.hash(this.gamesPlayed, this.secondsPlayed, this.shotsAgainst, this.goalsAgainst);
     }
 
     @Override
