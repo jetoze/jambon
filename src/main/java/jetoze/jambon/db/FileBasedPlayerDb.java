@@ -39,7 +39,7 @@ final class FileBasedPlayerDb extends PlayerDb {
         try {
             XmlOutput output = PlayerMasterDetailsXml.build(details);
             File file = getFile(details.getId());
-            output.toFile(file);
+            output.writeToFile(file);
         } catch (IOException e) {
             throw new DbException("Failed to write player master details", e);
         }
@@ -59,16 +59,28 @@ final class FileBasedPlayerDb extends PlayerDb {
     }
 
     @Override
-    public void storeStrengths(String id, Season season, Strengths strengths) {
-        
-        // TODO Auto-generated method stub
-        
+    public void storeStrengths(String playerId, Season season, Strengths strengths) {
+        try {
+            File file = strengthsFile(playerId, season);
+            StrengthsXml.build(strengths).writeToFile(file);
+        } catch (IOException e) {
+            throw new DbException("Failed to write player strengths", e);
+        }
     }
 
     @Override
-    public Strengths loadStrengths(String id, Season season) {
-        // TODO Auto-generated method stub
-        return null;
+    public Strengths loadStrengths(String playerId, Season season) {
+        // TODO: Identical structure to loadMasterDetails (and the coming loadStats).
+        // Refactor out to a common utility method?
+        File file = strengthsFile(playerId, season);
+        if (!file.canRead()) {
+            throw new DbException("No such player and season: " + playerId + ", " + season);
+        }
+        try {
+            return StrengthsXml.fromFile(file);
+        } catch (SAXException | IOException e) {
+            throw new DbException("Failed to load player strengths", e);
+        }
     }
 
     private File getFile(String playerId) {
@@ -93,8 +105,16 @@ final class FileBasedPlayerDb extends PlayerDb {
         return f;
     }
     
+    private Folder strengthsFolder(Season season) {
+        Folder f = seasonFolder(season).subFolder("strengths");
+        f.createOnDisk();
+        return f;
+    }
+    
     private File strengthsFile(String id, Season season) {
+        // TODO: Add "strengths" to the file name? The files are stored in a separate
+        // folder, so not strictly necessary.
         String name = id + ".xml";
-        return seasonFolder(season).getFile(name);
+        return strengthsFolder(season).getFile(name);
     }
 }

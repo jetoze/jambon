@@ -16,7 +16,7 @@ final class XmlOutput {
         return this.xml.toXml();
     }
     
-    public void toFile(File file) throws IOException {
+    public void writeToFile(File file) throws IOException {
         this.xml.writeToFile(file);
     }
 }
