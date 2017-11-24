@@ -2,6 +2,7 @@ package jetoze.jambon.db;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import org.xml.sax.SAXException;
 
@@ -31,22 +32,16 @@ final class StrengthsXml {
     }
     
     public static Strengths fromXml(String xml) throws SAXException {
-        Builder builder = new Builder();
-        ExhumeSaxParser parser = new ExhumeSaxParser(builder);
-        parser.parseXml(xml);
-        return builder.build();
+        return XmlUtils.loadFromXml(xml, new Builder());
     }
     
     public static Strengths fromFile(File file) throws SAXException, IOException {
-        Builder builder = new Builder();
-        ExhumeSaxParser parser = new ExhumeSaxParser(builder);
-        parser.parseFile(file);
-        return builder.build();
+        return XmlUtils.loadFromFile(file, new Builder());
     }
     
     
     @RootPath("Strengths/")
-    private static class Builder {
+    private static class Builder implements Supplier<Strengths> {
         private double goalie;
         private double defensive;
         private double scoring;
@@ -72,7 +67,7 @@ final class StrengthsXml {
             this.passing = value;
         }
         
-        public Strengths build() {
+        public Strengths get() {
             return new Strengths(
                     new ForwardStrength(this.scoring, this.passing), 
                     new DefenderStrength(this.defensive), 

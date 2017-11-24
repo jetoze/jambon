@@ -3,6 +3,7 @@ package jetoze.jambon.db;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.function.Supplier;
 
 import org.xml.sax.SAXException;
 
@@ -39,23 +40,17 @@ final class PlayerMasterDetailsXml {
     }
     
     public static PlayerMasterDetails fromXml(String xml) throws SAXException {
-        MasterDetailsBuilder builder = new MasterDetailsBuilder();
-        ExhumeSaxParser parser = new ExhumeSaxParser(builder);
-        parser.parseXml(xml);
-        return builder.build();
+        return XmlUtils.loadFromXml(xml, new MasterDetailsBuilder());
     }
     
     public static PlayerMasterDetails fromFile(File file) throws SAXException, IOException {
-        MasterDetailsBuilder builder = new MasterDetailsBuilder();
-        ExhumeSaxParser parser = new ExhumeSaxParser(builder);
-        parser.parseFile(file);
-        return builder.build();
+        return XmlUtils.loadFromFile(file, new MasterDetailsBuilder());
     }
     
     
     // TODO: Once ExhumeSaxParser supports private handler, make this class private.
     @RootPath("/Player/")
-    private static final class MasterDetailsBuilder {
+    private static final class MasterDetailsBuilder implements Supplier<PlayerMasterDetails> {
         private String id;
         private String firstName;
         private String lastName;
@@ -87,7 +82,8 @@ final class PlayerMasterDetailsXml {
             seasons.add(Season.fromString(value));
         }
         
-        public PlayerMasterDetails build() {
+        @Override
+        public PlayerMasterDetails get() {
             return new PlayerMasterDetails(this.id, new PlayerName(this.lastName, this.firstName),
                     this.birthDate, this.seasons.build());
         }
