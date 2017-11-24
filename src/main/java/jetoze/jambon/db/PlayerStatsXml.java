@@ -36,11 +36,11 @@ final class PlayerStatsXml {
         return new XmlOutput(xml);
     }
     
-    public static PlayerStats loadFromFile(File file) throws IOException, SAXException {
+    public static PlayerStats fromFile(File file) throws IOException, SAXException {
         return XmlUtils.loadFromFile(file, new Parser());
     }
 
-    public static PlayerStats loadFromXml(String xml) throws SAXException {
+    public static PlayerStats fromXml(String xml) throws SAXException {
         return XmlUtils.loadFromXml(xml, new Parser());
     }
     

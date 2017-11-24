@@ -86,14 +86,25 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     @Override
     public void storeStats(String playerId, Season season, PlayerStats stats) {
-        // TODO Auto-generated method stub
-        
+        try {
+            File file = statsFile(playerId, season);
+            PlayerStatsXml.build(stats).writeToFile(file);
+        } catch (IOException e) {
+            throw new DbException("Failed to write player stats", e);
+        }
     }
 
     @Override
     public PlayerStats loadStats(String playerId, Season season) {
-        // TODO Auto-generated method stub
-        return null;
+        File file = statsFile(playerId, season);
+        if (!file.canRead()) {
+            throw new DbException("No such player and season: " + playerId + ", " + season);
+        }
+        try {
+            return PlayerStatsXml.fromFile(file);
+        } catch (SAXException | IOException e) {
+            throw new DbException("Failed to load player strengths", e);
+        }
     }
 
     private File getFile(String playerId) {
@@ -129,5 +140,18 @@ final class FileBasedPlayerDb extends PlayerDb {
         // folder, so not strictly necessary.
         String name = playerId + ".xml";
         return strengthsFolder(season).getFile(name);
+    }
+    
+    private Folder statsFolder(Season season) {
+        Folder f = seasonFolder(season).subFolder("stats");
+        f.createOnDisk();
+        return f;
+    }
+    
+    private File statsFile(String playerId, Season season) {
+        // TODO: Add "stats" to the file name? The files are stored in a separate
+        // folder, so not strictly necessary.
+        String name = playerId + ".xml";
+        return statsFolder(season).getFile(name);
     }
 }

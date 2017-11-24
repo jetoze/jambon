@@ -18,7 +18,7 @@ public final class PlayerStatsXmlTest {
                 new GoalieStats(75, 10000, 1500, 177));
         String xml = PlayerStatsXml.build(p0).toXml();
         try {
-            PlayerStats p1 = PlayerStatsXml.loadFromXml(xml);
+            PlayerStats p1 = PlayerStatsXml.fromXml(xml);
             assertEquals(p0, p1);
         } catch (SAXException e) {
             fail(e.getMessage());
