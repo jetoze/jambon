@@ -62,7 +62,7 @@ final class FileBasedPlayerDb extends PlayerDb {
     public void storeStrengths(String playerId, Season season, Strengths strengths) {
         try {
             File file = strengthsFile(playerId, season);
-            StrengthsXml.build(strengths).writeToFile(file);
+            PlayerStrengthsXml.build(strengths).writeToFile(file);
         } catch (IOException e) {
             throw new DbException("Failed to write player strengths", e);
         }
@@ -77,7 +77,7 @@ final class FileBasedPlayerDb extends PlayerDb {
             throw new DbException("No such player and season: " + playerId + ", " + season);
         }
         try {
-            return StrengthsXml.fromFile(file);
+            return PlayerStrengthsXml.fromFile(file);
         } catch (SAXException | IOException e) {
             throw new DbException("Failed to load player strengths", e);
         }

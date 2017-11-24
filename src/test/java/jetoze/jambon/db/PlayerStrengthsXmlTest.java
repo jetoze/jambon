@@ -10,7 +10,7 @@ import jetoze.jambon.player.ForwardStrength;
 import jetoze.jambon.player.GoalieStrength;
 import jetoze.jambon.player.Strengths;
 
-public final class StrengthsXmlTest {
+public final class PlayerStrengthsXmlTest {
 
     @Test
     public void testStoreAndLoad() {
@@ -19,9 +19,9 @@ public final class StrengthsXmlTest {
                 new DefenderStrength(0.88),
                 new GoalieStrength(0.12)
         );
-        String xml = StrengthsXml.build(s0).toXml();
+        String xml = PlayerStrengthsXml.build(s0).toXml();
         try {
-            Strengths s1 = StrengthsXml.fromXml(xml);
+            Strengths s1 = PlayerStrengthsXml.fromXml(xml);
             assertEquals(s0, s1);
         } catch (SAXException e) {
             fail(e.getMessage());

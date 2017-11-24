@@ -14,7 +14,7 @@ import tzeth.exhume.XmlBuilder;
 import tzeth.exhume.sax.ElementEnd;
 import tzeth.exhume.sax.RootPath;
 
-final class StrengthsXml {
+final class PlayerStrengthsXml {
     public static XmlOutput build(Strengths strengths) {
         XmlBuilder xml = new XmlBuilder();
         xml.root("Strengths")

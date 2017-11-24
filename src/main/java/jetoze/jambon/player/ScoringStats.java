@@ -6,16 +6,16 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-public final class PlayerScoringStats {
+public final class ScoringStats {
     private final int gamesPlayed;
     private final int goalsScored;
     private final int assists;
 
-    public PlayerScoringStats() {
+    public ScoringStats() {
         this(0, 0, 0);
     }
 
-    public PlayerScoringStats(int gamesPlayed, int goalsScored, int assists) {
+    public ScoringStats(int gamesPlayed, int goalsScored, int assists) {
         this.gamesPlayed = checkNotNegative(gamesPlayed);
         this.goalsScored = checkNotNegative(goalsScored);
         this.assists = checkNotNegative(assists);
@@ -37,8 +37,8 @@ public final class PlayerScoringStats {
         return goalsScored + assists;
     }
 
-    public PlayerScoringStats addGameStats(GameScoringStats gameStats) {
-        return new PlayerScoringStats(this.gamesPlayed + 1,
+    public ScoringStats addGameStats(GameScoringStats gameStats) {
+        return new ScoringStats(this.gamesPlayed + 1,
                 this.goalsScored + gameStats.getGoalsScored(),
                 this.assists + gameStats.getAssists());
     }
@@ -48,8 +48,8 @@ public final class PlayerScoringStats {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof PlayerScoringStats) {
-            PlayerScoringStats that = (PlayerScoringStats) obj;
+        if (obj instanceof ScoringStats) {
+            ScoringStats that = (ScoringStats) obj;
             return (this.gamesPlayed == that.gamesPlayed) && (this.goalsScored == that.goalsScored)
                     && (this.assists == that.assists);
         }
