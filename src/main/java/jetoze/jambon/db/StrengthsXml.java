@@ -12,7 +12,6 @@ import jetoze.jambon.player.GoalieStrength;
 import jetoze.jambon.player.Strengths;
 import tzeth.exhume.XmlBuilder;
 import tzeth.exhume.sax.ElementEnd;
-import tzeth.exhume.sax.ExhumeSaxParser;
 import tzeth.exhume.sax.RootPath;
 
 final class StrengthsXml {
@@ -67,6 +66,7 @@ final class StrengthsXml {
             this.passing = value;
         }
         
+        @Override
         public Strengths get() {
             return new Strengths(
                     new ForwardStrength(this.scoring, this.passing), 

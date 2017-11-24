@@ -16,7 +16,6 @@ import tzeth.exhume.XmlBuilder;
 import tzeth.exhume.XmlBuilder.Element;
 import tzeth.exhume.sax.ElementEnd;
 import tzeth.exhume.sax.ElementStart;
-import tzeth.exhume.sax.ExhumeSaxParser;
 import tzeth.exhume.sax.RootPath;
 import tzeth.exhume.sax.StartOfElement;
 
