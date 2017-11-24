@@ -48,11 +48,11 @@ public abstract class PlayerDb {
     
     public abstract void storeMasterDetails(PlayerMasterDetails details);
     
-    public abstract PlayerMasterDetails loadMasterDetails(String id);
+    public abstract PlayerMasterDetails loadMasterDetails(String playerId);
 
-    public abstract void storeStrengths(String id, Season season, Strengths strengths);
+    public abstract void storeStrengths(String playerId, Season season, Strengths strengths);
     
-    public abstract Strengths loadStrengths(String id, Season season);
+    public abstract Strengths loadStrengths(String playerId, Season season);
     
     public static PlayerDb fileBased(Folder dir) {
         dir.createOnDisk();

@@ -111,10 +111,10 @@ final class FileBasedPlayerDb extends PlayerDb {
         return f;
     }
     
-    private File strengthsFile(String id, Season season) {
+    private File strengthsFile(String playerId, Season season) {
         // TODO: Add "strengths" to the file name? The files are stored in a separate
         // folder, so not strictly necessary.
-        String name = id + ".xml";
+        String name = playerId + ".xml";
         return strengthsFolder(season).getFile(name);
     }
 }
