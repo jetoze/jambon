@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableSet;
 
 import jetoze.jambon.Season;
 import jetoze.jambon.player.PlayerMasterDetails;
+import jetoze.jambon.player.PlayerStats;
 import jetoze.jambon.player.Strengths;
 import jetoze.jambon.util.Folder;
 import tzeth.collections.ImCollectors;
@@ -81,6 +82,18 @@ final class FileBasedPlayerDb extends PlayerDb {
         } catch (SAXException | IOException e) {
             throw new DbException("Failed to load player strengths", e);
         }
+    }
+
+    @Override
+    public void storeStats(String playerId, Season season, PlayerStats stats) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public PlayerStats loadStats(String playerId, Season season) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private File getFile(String playerId) {

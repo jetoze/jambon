@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 
 import jetoze.jambon.Season;
 import jetoze.jambon.player.PlayerMasterDetails;
+import jetoze.jambon.player.PlayerStats;
 import jetoze.jambon.player.Strengths;
 import jetoze.jambon.util.Folder;
 
@@ -53,6 +54,10 @@ public abstract class PlayerDb {
     public abstract void storeStrengths(String playerId, Season season, Strengths strengths);
     
     public abstract Strengths loadStrengths(String playerId, Season season);
+    
+    public abstract void storeStats(String playerId, Season season, PlayerStats stats);
+    
+    public abstract PlayerStats loadStats(String playerId, Season season);
     
     public static PlayerDb fileBased(Folder dir) {
         dir.createOnDisk();

@@ -12,13 +12,15 @@ public final class GoalieStats {
     private final int gamesPlayed;
     private final int shotsAgainst;
     private final int goalsAgainst;
+    private final int secondsPlayed;
 
     public GoalieStats() {
-        this(0, 0, 0);
+        this(0, 0, 0, 0);
     }
 
-    public GoalieStats(int gamesPlayed, int shotsAgainst, int goalsAgainst) {
+    public GoalieStats(int gamesPlayed, int secondsPlayed, int shotsAgainst, int goalsAgainst) {
         this.gamesPlayed = checkNotNegative(gamesPlayed);
+        this.secondsPlayed = checkNotNegative(secondsPlayed);
         this.shotsAgainst = checkNotNegative(shotsAgainst);
         this.goalsAgainst = checkNotNegative(goalsAgainst);
         checkArgument(shotsAgainst >= goalsAgainst);
@@ -40,8 +42,14 @@ public final class GoalieStats {
         return shotsAgainst - goalsAgainst;
     }
 
-    public GoalieStats addGameStats(GoalieGameStats gameStats) {
+    public int getSecondsPlayed() {
+        return secondsPlayed;
+    }
+
+    public GoalieStats addGameStats(GoalieStats gameStats) {
+        checkArgument(gameStats.getGamesPlayed() == 1);
         return new GoalieStats(this.gamesPlayed + 1,
+                this.secondsPlayed + gameStats.getSecondsPlayed(),
                 this.shotsAgainst + gameStats.getShotsAgainst(),
                 this.goalsAgainst + gameStats.getGoalsAgainst());
     }
@@ -55,18 +63,20 @@ public final class GoalieStats {
             GoalieStats that = (GoalieStats) obj;
             return (this.gamesPlayed == that.gamesPlayed)
                     && (this.shotsAgainst == that.shotsAgainst)
-                    && (this.goalsAgainst == that.goalsAgainst);
+                    && (this.goalsAgainst == that.goalsAgainst)
+                    && (this.secondsPlayed == that.secondsPlayed);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.gamesPlayed, this.shotsAgainst, this.goalsAgainst);
+        return Objects.hash(this.gamesPlayed, this.shotsAgainst, this.goalsAgainst, this.secondsPlayed);
     }
 
     @Override
     public String toString() {
+        // TODO: Include time played (hh:mm:ss)
         return String.format("%d GP, %d shots against, %d goals against", this.gamesPlayed,
                 this.shotsAgainst, this.goalsAgainst);
     }
