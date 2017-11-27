@@ -21,6 +21,7 @@ public final class ForwardStrength implements Comparable<ForwardStrength> {
         return passingFactor;
     }
 
+    @Override
     public int compareTo(ForwardStrength o) {
         // TODO: This is not obvoiusly correct
         return Double.compare(this.scoringFactor + this.passingFactor,
@@ -47,7 +48,7 @@ public final class ForwardStrength implements Comparable<ForwardStrength> {
 
     @Override
     public String toString() {
-        return String.format("Scoring: %d. Passing: %d", scoringFactor, passingFactor);
+        return String.format("Scoring: %4.2f. Passing: %4.2f", scoringFactor, passingFactor);
     }
 
 }

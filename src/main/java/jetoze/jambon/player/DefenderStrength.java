@@ -13,6 +13,7 @@ public final class DefenderStrength implements Comparable<DefenderStrength> {
         return factor;
     }
 
+    @Override
     public int compareTo(DefenderStrength o) {
         return Double.compare(this.factor, o.factor);
     }
@@ -29,7 +30,7 @@ public final class DefenderStrength implements Comparable<DefenderStrength> {
 
     @Override
     public String toString() {
-        return Double.toString(factor);
+        return String.format("%4.2f", factor);
     }
 
 }

@@ -16,6 +16,7 @@ public final class GoalieStrength implements Comparable<GoalieStrength> {
         return savePercentage;
     }
 
+    @Override
     public int compareTo(GoalieStrength o) {
         return Double.compare(this.savePercentage, o.savePercentage);
     }
@@ -32,6 +33,6 @@ public final class GoalieStrength implements Comparable<GoalieStrength> {
 
     @Override
     public String toString() {
-        return Double.toString(savePercentage);
+        return String.format("%4.3f", savePercentage);
     }
 }
