@@ -1,23 +1,40 @@
 package jetoze.jambon.tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import jetoze.jambon.player.PlayerName;
 import tzeth.collections.ImCollectors;
+import tzeth.exceptions.NotImplementedYetException;
 
 public final class PlayerListCreator {
-    private static final String RETRO_SHEET_FILE = "/Users/torgil/coding/files/jambon/retro-sheet/mlb_player_names_and_ids.txt";
-    
-    public PlayerListCreator() {
-        // TODO Auto-generated constructor stub
-    }
+    private static final String RETRO_SHEET_FILE = "/Users/tzethson/fun/files/jambon/retrosheet/mlb_player_names_and_ids.txt";
     
     public static void main(String[] args) throws Exception {
-        loadIdsAndNames().forEach(System.out::println);
+        ImmutableSet<IdAndName> idsAndNames = loadIdsAndNames();
+        idsAndNames.stream()
+            .map(PlayerListCreator::scrapePlayerInfo)
+            .map(i -> i.birthDate)
+            .forEach(System.out::println);
     }
 
     private static ImmutableSet<IdAndName> loadIdsAndNames() throws Exception {
@@ -29,6 +46,26 @@ public final class PlayerListCreator {
             .collect(ImCollectors.toSet());
     }
     
+    @Nullable
+    private static Info scrapePlayerInfo(IdAndName ian) {
+        try {
+            String url = String.format("http://www.retrosheet.org/boxesetc/%s/P%s.htm",
+                    ian.name.getLastName().charAt(0), ian.id);
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                HttpGet get = new HttpGet(url);
+                try (CloseableHttpResponse response = httpClient.execute(get)) {
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        HttpEntity entity = response.getEntity();
+                        String payload = EntityUtils.toString(entity);
+                        return Info.fromHtml(payload);
+                    }
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     private static class IdAndName {
         private final String id;
@@ -47,6 +84,10 @@ public final class PlayerListCreator {
             if (firstName.isEmpty()) {
                 return Optional.empty();
             }
+            String debutAsPlayer = parts[3];
+            if (debutAsPlayer.isEmpty()) {
+                return Optional.empty();
+            }
             return Optional.of(new IdAndName(id, new PlayerName(lastName, firstName)));
         }
         
@@ -62,6 +103,44 @@ public final class PlayerListCreator {
         @Override
         public String toString() {
             return String.format("%s [%s]", name.shortForm(), id);
+        }
+    }
+    
+    
+    private static class Info {
+        private static final DateTimeFormatter BIRTH_DATE_PATTERN = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+        private final LocalDate birthDate;
+        private final ImmutableList<Integer> years;
+        
+        public Info(LocalDate birthDate, ImmutableList<Integer> years) {
+            this.birthDate = birthDate;
+            this.years = years;
+        }
+
+        @Nullable
+        public static Info fromHtml(String html) {
+            LocalDate birthDate = scrapeBirthDate(html);
+            if (birthDate == null) {
+                return null;
+            }
+            // TODO: Scrape years
+            return new Info(birthDate, ImmutableList.of());
+        }
+        
+        @Nullable
+        private static LocalDate scrapeBirthDate(String html) {
+            String birthDateMarker = "<TR><TD>Born ";
+            int birthDateMarkerIndex = html.indexOf(birthDateMarker);
+            if (birthDateMarkerIndex == -1) {
+                return null;
+            }
+            int birthDateEndIndex = html.indexOf(", <A href", birthDateMarkerIndex);
+            if (birthDateEndIndex == -1) {
+                return null;
+            }
+            String birthDateRawString = html.substring(birthDateMarkerIndex + birthDateMarker.length(), 
+                    birthDateEndIndex).replaceAll("\\s+", " ");
+            return LocalDate.parse(birthDateRawString, BIRTH_DATE_PATTERN);
         }
     }
     
