@@ -1,27 +1,32 @@
 package jetoze.jambon.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static tzeth.preconds.MorePreconditions.checkNotNegative;
 
 import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import jetoze.jambon.PlayingTime;
+
 public final class GoalieStats {
     // TODO: Add seconds played
     private final int gamesPlayed;
+    private final PlayingTime playingTime;
     private final int shotsAgainst;
     private final int goalsAgainst;
-    private final int secondsPlayed;
 
     public GoalieStats() {
-        this(0, 0, 0, 0);
+        this(0, PlayingTime.none(), 0, 0);
     }
 
-    // TODO: Too many int-arguments make this constructor very user-unfriendly and error prone.
-    public GoalieStats(int gamesPlayed, int secondsPlayed, int shotsAgainst, int goalsAgainst) {
+    // TODO: Too many int-arguments make this constructor very user-unfriendly
+    // and error prone.
+    public GoalieStats(int gamesPlayed, PlayingTime playingTime, int shotsAgainst,
+            int goalsAgainst) {
         this.gamesPlayed = checkNotNegative(gamesPlayed);
-        this.secondsPlayed = checkNotNegative(secondsPlayed);
+        this.playingTime = checkNotNull(playingTime);
         this.shotsAgainst = checkNotNegative(shotsAgainst);
         this.goalsAgainst = checkNotNegative(goalsAgainst);
         checkArgument(shotsAgainst >= goalsAgainst);
@@ -29,6 +34,10 @@ public final class GoalieStats {
 
     public int getGamesPlayed() {
         return gamesPlayed;
+    }
+
+    public PlayingTime getPlayingTime() {
+        return playingTime;
     }
 
     public int getShotsAgainst() {
@@ -43,13 +52,10 @@ public final class GoalieStats {
         return shotsAgainst - goalsAgainst;
     }
 
-    public int getSecondsPlayed() {
-        return secondsPlayed;
-    }
-
     public GoalieStats add(GoalieStats o) {
-        return new GoalieStats(this.gamesPlayed + o.gamesPlayed,
-                this.secondsPlayed + o.secondsPlayed,
+        return new GoalieStats(
+                this.gamesPlayed + o.gamesPlayed,
+                this.playingTime.add(o.playingTime), 
                 this.shotsAgainst + o.shotsAgainst,
                 this.goalsAgainst + o.goalsAgainst);
     }
@@ -62,7 +68,7 @@ public final class GoalieStats {
         if (obj instanceof GoalieStats) {
             GoalieStats that = (GoalieStats) obj;
             return (this.gamesPlayed == that.gamesPlayed)
-                    && (this.secondsPlayed == that.secondsPlayed)
+                    && this.playingTime.equals(that.playingTime)
                     && (this.shotsAgainst == that.shotsAgainst)
                     && (this.goalsAgainst == that.goalsAgainst);
         }
@@ -71,14 +77,15 @@ public final class GoalieStats {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.gamesPlayed, this.secondsPlayed, this.shotsAgainst, this.goalsAgainst);
+        return Objects.hash(this.gamesPlayed, this.playingTime, this.shotsAgainst,
+                this.goalsAgainst);
     }
 
     @Override
     public String toString() {
         // TODO: Include time played (hh:mm:ss)
-        return String.format("%d GP, %d shots against, %d goals against", this.gamesPlayed,
-                this.shotsAgainst, this.goalsAgainst);
+        return String.format("%d GP [%s], %d shots against, %d goals against", this.gamesPlayed,
+                this.playingTime, this.shotsAgainst, this.goalsAgainst);
     }
 
 }

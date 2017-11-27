@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.xml.sax.SAXException;
 
+import jetoze.jambon.PlayingTime;
 import jetoze.jambon.player.GoalieStats;
 import jetoze.jambon.player.PlayerStats;
 import jetoze.jambon.player.ScoringStats;
@@ -29,7 +30,7 @@ final class PlayerStatsXml {
         // Only write goalie stats if the player has actually played as a goalie.
         if (goalieStats.getGamesPlayed() > 0) {
             goalieElement.child("Gm").withValue(goalieStats.getGamesPlayed()).close()
-                .child("Tm").withValue(goalieStats.getSecondsPlayed()).close()
+                .child("Tm").withValue(goalieStats.getPlayingTime().getSeconds()).close()
                 .child("SA").withValue(goalieStats.getShotsAgainst()).close()
                 .child("GA").withValue(goalieStats.getGoalsAgainst());
         }
@@ -57,8 +58,11 @@ final class PlayerStatsXml {
         
         @Override
         public PlayerStats get() {
-            ScoringStats scoring = new ScoringStats(this.scoringStatsGames, this.goalsScored, this.assists);
-            GoalieStats goalie = new GoalieStats(this.gamesAsGoale, this.secondsPlayedAsGoalie, this.shotsAgainst, this.goalsAgainst);
+            ScoringStats scoring = new ScoringStats(this.scoringStatsGames, this.goalsScored,
+                    this.assists);
+            GoalieStats goalie = new GoalieStats(this.gamesAsGoale,
+                    new PlayingTime(this.secondsPlayedAsGoalie), this.shotsAgainst,
+                    this.goalsAgainst);
             return new PlayerStats(scoring, goalie);
         }
         
