@@ -47,6 +47,8 @@ public abstract class PlayerDb {
 
     public abstract ImmutableSet<String> listAllPlayerIds();
     
+    public abstract boolean contains(String playerId);
+    
     public abstract void storeMasterDetails(PlayerMasterDetails details);
     
     public abstract PlayerMasterDetails loadMasterDetails(String playerId);

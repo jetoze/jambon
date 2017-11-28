@@ -33,13 +33,15 @@ public final class PlayerListCreator {
     public static void main(String[] args) throws Exception {
         ImmutableSet<IdAndName> idsAndNames = loadIdsAndNames();
         PlayerDb db = PlayerDb.fileBased(PLAYER_DB_DIR);
-        idsAndNames.forEach(ian -> {
-            Info info = scrapePlayerInfo(ian);
-            if (info != null) {
-                PlayerMasterDetails pmd = new PlayerMasterDetails(ian.id, ian.name, info.birthDate, ImmutableList.of());
-                db.storeMasterDetails(pmd);
-            }
-        });
+        idsAndNames.stream()
+            .filter(ian -> !db.contains(ian.id))
+            .forEach(ian -> {
+                Info info = scrapePlayerInfo(ian);
+                if (info != null) {
+                    PlayerMasterDetails pmd = new PlayerMasterDetails(ian.id, ian.name, info.birthDate, ImmutableList.of());
+                    db.storeMasterDetails(pmd);
+                }
+            });
     }
 
     private static ImmutableSet<IdAndName> loadIdsAndNames() throws Exception {

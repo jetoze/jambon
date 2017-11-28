@@ -36,6 +36,12 @@ final class FileBasedPlayerDb extends PlayerDb {
     }
 
     @Override
+    public boolean contains(String playerId) {
+        File file = getFile(playerId);
+        return file.canRead();
+    }
+
+    @Override
     public void storeMasterDetails(PlayerMasterDetails details) {
         try {
             XmlOutput output = PlayerMasterDetailsXml.build(details);
