@@ -11,8 +11,6 @@ import javax.annotation.Nullable;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,19 +20,26 @@ import org.apache.http.util.EntityUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import jetoze.jambon.db.PlayerDb;
+import jetoze.jambon.player.PlayerMasterDetails;
 import jetoze.jambon.player.PlayerName;
+import jetoze.jambon.util.Folder;
 import tzeth.collections.ImCollectors;
-import tzeth.exceptions.NotImplementedYetException;
 
 public final class PlayerListCreator {
     private static final String RETRO_SHEET_FILE = "/Users/tzethson/fun/files/jambon/retrosheet/mlb_player_names_and_ids.txt";
+    private static final Folder PLAYER_DB_DIR = new Folder("/Users/tzethson/fun/files/jambon/player_db");
     
     public static void main(String[] args) throws Exception {
         ImmutableSet<IdAndName> idsAndNames = loadIdsAndNames();
-        idsAndNames.stream()
-            .map(PlayerListCreator::scrapePlayerInfo)
-            .map(i -> i.birthDate)
-            .forEach(System.out::println);
+        PlayerDb db = PlayerDb.fileBased(PLAYER_DB_DIR);
+        idsAndNames.forEach(ian -> {
+            Info info = scrapePlayerInfo(ian);
+            if (info != null) {
+                PlayerMasterDetails pmd = new PlayerMasterDetails(ian.id, ian.name, info.birthDate, ImmutableList.of());
+                db.storeMasterDetails(pmd);
+            }
+        });
     }
 
     private static ImmutableSet<IdAndName> loadIdsAndNames() throws Exception {
@@ -138,9 +143,14 @@ public final class PlayerListCreator {
             if (birthDateEndIndex == -1) {
                 return null;
             }
-            String birthDateRawString = html.substring(birthDateMarkerIndex + birthDateMarker.length(), 
-                    birthDateEndIndex).replaceAll("\\s+", " ");
-            return LocalDate.parse(birthDateRawString, BIRTH_DATE_PATTERN);
+            try {
+                String birthDateRawString = html.substring(birthDateMarkerIndex + birthDateMarker.length(), 
+                        birthDateEndIndex).replaceAll("\\s+", " ");
+                return LocalDate.parse(birthDateRawString, BIRTH_DATE_PATTERN);
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                return null;
+            }
         }
     }
     
