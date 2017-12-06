@@ -5,6 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.xml.sax.SAXException;
 
@@ -16,6 +20,8 @@ import jetoze.jambon.player.PlayerStats;
 import jetoze.jambon.player.Strengths;
 import jetoze.jambon.util.Folder;
 import tzeth.collections.ImCollectors;
+import tzeth.concurrent.RW;
+import tzeth.function.ThrowingFunction;
 
 final class FileBasedPlayerDb extends PlayerDb {
     private static final FileFilter FILE_FILTER = f -> {
@@ -24,6 +30,7 @@ final class FileBasedPlayerDb extends PlayerDb {
     };
 
     private final Folder dir;
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     public FileBasedPlayerDb(Folder dir) {
         this.dir = checkNotNull(dir);
@@ -37,12 +44,24 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     @Override
     public boolean contains(String playerId) {
+        return RW.read(rwLock).test(playerId, this::containsImpl);
+    }
+
+    private Boolean containsImpl(String playerId) {
         File file = getFile(playerId);
         return file.canRead();
     }
 
     @Override
     public void storeMasterDetails(PlayerMasterDetails details) {
+        RW.write(rwLock).consume(details, this::storeMasterDetailsImpl);
+    }
+
+    private void storeMasterDetailsImpl(PlayerMasterDetails details) {
+        // TODO: I can probably be consolidated with the store(...) below.
+        // The general store method should take a Function<playerId, File> as input.
+        // The current store(...) need to compose a new Function that goes from
+        // (playerId, strength) (etc) to File.
         try {
             XmlOutput output = PlayerMasterDetailsXml.build(details);
             File file = getFile(details.getId());
@@ -54,6 +73,10 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     @Override
     public PlayerMasterDetails loadMasterDetails(String playerId) {
+        return RW.read(rwLock).apply(playerId, this::loadMasterDetailsImpl);
+    }
+
+    private PlayerMasterDetails loadMasterDetailsImpl(String playerId) {
         File file = getFile(playerId);
         if (!file.canRead()) {
             throw new DbException("Unknown player: " + playerId);
@@ -67,50 +90,56 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     @Override
     public void storeStrengths(String playerId, Season season, Strengths strengths) {
-        try {
-            File file = strengthsFile(playerId, season);
-            PlayerStrengthsXml.build(strengths).writeToFile(file);
-        } catch (IOException e) {
-            throw new DbException("Failed to write player strengths", e);
-        }
+        store(playerId, season, strengths, this::strengthsFile, PlayerStrengthsXml::build);
     }
 
+    private <T> void store(String playerId, Season season, T value,
+            BiFunction<String, Season, File> fileFactory, Function<T, XmlOutput> writer) {
+        RW.write(rwLock).run(() -> storeImpl(playerId, season, value, fileFactory, writer));
+    }
+
+    private <T> void storeImpl(String playerId, Season season, T value,
+            BiFunction<String, Season, File> fileFactory, Function<T, XmlOutput> writer) {
+        try {
+            File file = fileFactory.apply(playerId, season);
+            XmlOutput output = writer.apply(value);
+            output.writeToFile(file);
+        } catch (IOException e) {
+            throw new DbException("Failed to write player data", e);
+        }
+    }
+    
     @Override
     public Strengths loadStrengths(String playerId, Season season) {
-        // TODO: Identical structure to loadMasterDetails (and the coming loadStats).
-        // Refactor out to a common utility method?
-        File file = strengthsFile(playerId, season);
+        return load(playerId, season, this::strengthsFile, PlayerStrengthsXml::fromFile);
+    }
+    
+    private <T> T load(String playerId, Season season, 
+            BiFunction<String, Season, File> fileFactory, ThrowingFunction<File, T> valueFactory) {
+        return RW.read(rwLock).get(() -> loadImpl(playerId, season, fileFactory, valueFactory));
+    }
+
+    private <T> T loadImpl(String playerId, Season season, 
+            BiFunction<String, Season, File> fileFactory, ThrowingFunction<File, T> valueFactory) {
+        File file = fileFactory.apply(playerId, season);
         if (!file.canRead()) {
             throw new DbException("No such player and season: " + playerId + ", " + season);
         }
         try {
-            return PlayerStrengthsXml.fromFile(file);
-        } catch (SAXException | IOException e) {
-            throw new DbException("Failed to load player strengths", e);
+            return valueFactory.apply(file);
+        } catch (Exception e) {
+            throw new DbException("Failed to load player data", e);
         }
     }
 
     @Override
     public void storeStats(String playerId, Season season, PlayerStats stats) {
-        try {
-            File file = statsFile(playerId, season);
-            PlayerStatsXml.build(stats).writeToFile(file);
-        } catch (IOException e) {
-            throw new DbException("Failed to write player stats", e);
-        }
+        store(playerId, season, stats, this::statsFile, PlayerStatsXml::build);
     }
 
     @Override
     public PlayerStats loadStats(String playerId, Season season) {
-        File file = statsFile(playerId, season);
-        if (!file.canRead()) {
-            throw new DbException("No such player and season: " + playerId + ", " + season);
-        }
-        try {
-            return PlayerStatsXml.fromFile(file);
-        } catch (SAXException | IOException e) {
-            throw new DbException("Failed to load player strengths", e);
-        }
+        return load(playerId, season, this::statsFile, PlayerStatsXml::fromFile);
     }
 
     private File getFile(String playerId) {

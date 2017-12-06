@@ -31,6 +31,10 @@ public final class PlayerListCreator {
     private static final Folder PLAYER_DB_DIR = new Folder("/Users/tzethson/fun/files/jambon/player_db");
     
     public static void main(String[] args) throws Exception {
+        IdAndName id = new IdAndName("younr001", new PlayerName("Yount", "Robin"));
+        Info i = scrapePlayerInfo(id);
+        System.out.println(i.birthDate);
+        
         ImmutableSet<IdAndName> idsAndNames = loadIdsAndNames();
         PlayerDb db = PlayerDb.fileBased(PLAYER_DB_DIR);
         idsAndNames.stream()
