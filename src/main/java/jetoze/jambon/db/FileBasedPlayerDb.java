@@ -9,8 +9,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import org.xml.sax.SAXException;
+import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -39,7 +38,8 @@ final class FileBasedPlayerDb extends PlayerDb {
     @Override
     public ImmutableSet<String> listAllPlayerIds() {
         // TODO: Or keep a separate master list of all IDs? This list could be cached in memory.
-        return dir.streamFiles(FILE_FILTER).map(this::idFromFile).collect(ImCollectors.toSet());
+        return RW.read(rwLock).get(() -> dir.streamFiles(FILE_FILTER).map(this::idFromFile)
+                .collect(ImCollectors.toSet()));
     }
 
     @Override
@@ -58,33 +58,36 @@ final class FileBasedPlayerDb extends PlayerDb {
     }
 
     private void storeMasterDetailsImpl(PlayerMasterDetails details) {
-        // TODO: I can probably be consolidated with the store(...) below.
-        // The general store method should take a Function<playerId, File> as input.
-        // The current store(...) need to compose a new Function that goes from
-        // (playerId, strength) (etc) to File.
-        try {
-            XmlOutput output = PlayerMasterDetailsXml.build(details);
-            File file = getFile(details.getId());
-            output.writeToFile(file);
-        } catch (IOException e) {
-            throw new DbException("Failed to write player master details", e);
-        }
+        writeFile(() -> PlayerMasterDetailsXml.build(details),
+                () -> getFile(details.getId()));
     }
 
+    private void writeFile(Supplier<XmlOutput> xmlProducer, Supplier<File> fileProducer) {
+        try {
+            XmlOutput xml = xmlProducer.get();
+            File file = fileProducer.get();
+            xml.writeToFile(file);
+        } catch (IOException e) {
+            throw new DbException("Failed to write player data", e);
+        }
+    }
+    
     @Override
     public PlayerMasterDetails loadMasterDetails(String playerId) {
         return RW.read(rwLock).apply(playerId, this::loadMasterDetailsImpl);
     }
 
     private PlayerMasterDetails loadMasterDetailsImpl(String playerId) {
-        File file = getFile(playerId);
-        if (!file.canRead()) {
-            throw new DbException("Unknown player: " + playerId);
-        }
+        return readFile(() -> getFileForRead(playerId), PlayerMasterDetailsXml::fromFile);
+    }
+    
+    private <T> T readFile(Supplier<File> fileProducer, ThrowingFunction<File, T> parser) {
+        File file = fileProducer.get();
         try {
-            return PlayerMasterDetailsXml.fromFile(file);
-        } catch (SAXException | IOException e) {
-            throw new DbException("Failed to load player master details", e);
+            T value = parser.apply(file);
+            return value;
+        } catch (Exception e) {
+            throw new DbException("Failed to load player data", e);
         }
     }
 
@@ -100,13 +103,7 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     private <T> void storeImpl(String playerId, Season season, T value,
             BiFunction<String, Season, File> fileFactory, Function<T, XmlOutput> writer) {
-        try {
-            File file = fileFactory.apply(playerId, season);
-            XmlOutput output = writer.apply(value);
-            output.writeToFile(file);
-        } catch (IOException e) {
-            throw new DbException("Failed to write player data", e);
-        }
+        writeFile(() -> writer.apply(value), () -> fileFactory.apply(playerId, season));
     }
     
     @Override
@@ -121,15 +118,14 @@ final class FileBasedPlayerDb extends PlayerDb {
 
     private <T> T loadImpl(String playerId, Season season, 
             BiFunction<String, Season, File> fileFactory, ThrowingFunction<File, T> valueFactory) {
-        File file = fileFactory.apply(playerId, season);
-        if (!file.canRead()) {
-            throw new DbException("No such player and season: " + playerId + ", " + season);
-        }
-        try {
-            return valueFactory.apply(file);
-        } catch (Exception e) {
-            throw new DbException("Failed to load player data", e);
-        }
+        Supplier<File> fileSupplier = () -> {
+            File file = fileFactory.apply(playerId, season);
+            if (!file.canRead()) {
+                throw new DbException("No such player and season: " + playerId + ", " + season);
+            }
+            return file;
+        };
+        return readFile(fileSupplier, valueFactory);
     }
 
     @Override
@@ -145,6 +141,14 @@ final class FileBasedPlayerDb extends PlayerDb {
     private File getFile(String playerId) {
         String name = getFileName(playerId);
         return dir.getFile(name);
+    }
+
+    private File getFileForRead(String playerId) {
+        File file = getFile(playerId);
+        if (!file.canRead()) {
+            throw new DbException("Unknown player: " + playerId);
+        }
+        return file;
     }
 
     private static String getFileName(String playerId) {
